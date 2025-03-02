@@ -1,0 +1,374 @@
+Linu
+Добавление второго диска
+
+Стркутура диска
+lsblk
+lsblk -f
+fdisk -l
+root@pc-free:/home/ubuntu# df -Th
+Файл.система   Тип   Размер Использовано  Дост Использовано% Cмонтировано в
+tmpfs          tmpfs   478M         1,8M  476M            1% /run
+/dev/sda2      ext4     49G          12G   36G           24% /
+tmpfs          tmpfs   2,4G         8,0K  2,4G            1% /dev/shm
+tmpfs          tmpfs   5,0M            0  5,0M            0% /run/lock
+tmpfs          tmpfs   478M         124K  478M            1% /run/user/1000
+
+
+Разбивка диска
+cfdisk /dev/sda
+q-выход
+
+Форматирование диска
+mkfs.ntfs -f  /dev/sda1  а не sda
+
+Диск1 или раздел 1  для /home (15Гб) /swap (2*ОЗУ)
+	Если пользователи не будут зогинится то заводим /home
+Диск2 для /home	(Для данных пользователей)
+Диск3 для /var -Если это Почтовик,БД, журналы
+
+Файловые системы
+/ - ReiserFS (blok=4kb) или 	EXT4 для рабочих станций
+/var - XFS  (For Oracle server)
+
+JFS для сервера БД
+для хостинга (где хранятся файлы других пользователей) - ReiserFS
+если нужно работать с большими объемами данных - XFS.
+
+
+Монтирование диска
+nano /etc/fstab
+Добавляем строчку   <file system> <mount point> <type> <options> <dump> <pass>
+устройство точка тип опции флаг копирования флаг_проверки
+ /dev/sda /media/myhdd ntfs default 0 0 
+
+Посмотреть UUID
+ ls /dev/disk/by-uuid -ltl
+ls /dev/disk/by-uuid -lt
+
+Имя ПК
+hostname
+cat /etc/hostname
+hostname newname  + вручную поменять в /etc/hostname  и /etc/hosts + reboot
+
+Смена IP
+ifconsig
+	eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.156.111  netmask 255.255.255.0  broadcast 192.168.156.255
+nano /etc/network/interfaces
+	auto eth0 inet  static
+	address 192.168.156.111
+	netmask 255.255.255.9
+	gateway 192.168.156.1
+	dns-nameservers 8.8.8.8
+Перезапуск сети
+ifdown eth0
+ifup eth0
+
+Временный IP
+ifconfig eth0 1.1.1.1 netmask 255.0.0.0 
+
+
+https://winitpro.ru/index.php/2019/10/17/windows-openssh-server/
+https://zomro.com/rus/blog/faq/399-kak-podnyat-openssh-na-windows-2012
+https://winitpro.ru/index.php/2020/01/22/vstroennyj-ssh-klient-windows/
+https://learn.microsoft.com/ru-ru/windows/terminal/tutorials/ssh
+https://hostpro.ua/wiki/vps/how-to-set-up-ssh-server-on-windows/
+
+SSH   or mobaXterm or putty
+apt-get install openssh-server
+service ssh start
+service ssh status
+ssh ubuntu@192.168.156.111
+
+KEY
+
+ssh-keygen -t RSA  
+ssh-keygen -t ed25519 -f ~/.ssh/key2
+-c "коментарий"
+Копируем открытый ключ в ~/.ssh/authorized_keys
+cmod 0600 authorized_keys
+ssh -i .\mykey ubuntu@192.168.156.111
+Чтобы не писать -i нужно переименовать  mykey(private_key)  ---> id_rsa и положить его в  ~/.ssh  
+cmod 0600 id_rsa
+
+Несколько ключей
+Файл глобальной конфигурации
+/etc/ssh/ssh_config
+Файл пользовательской конфигурации
+~/.ssh/config
+
+Редактируем файл config
+Host myubuntu
+	HostName 192.168.156.111
+	User ubuntu
+	Port 22
+#Для всех *.адрес.com
+Host *var1.myadress.com
+	User ubuntu
+	IdentityFile ~/.ssh/keyforvar1.pem
+Host *var2.myadress.com
+	User ubuntu
+	IdentityFile ~/.ssh/keyforvar2.pem
+Host *     #Для всех
+	StrictHostKeyChecking no # Don't ask confirmation for fingerprint
+	UserKnownHostsFile /dev/null # Don't save into known_hosts
+
+Выполнение по расписанию
+crontab -e	редактировать
+crontab -l	смотреть
+cat /var/spool/cron/crontabs/ubuntu 	здесь лежит отредактированный файл 
+m          H          DOM                 MON          DOW      COMMAMD                
+min (0-59) hour(0-23) day of month (1-31) month (1-12) day of week (0-6) (Sunday=0) 
+
+* -каждый
+* * * * * echo "Privet!" >> /home/ubuntu/mylog.txt
+*/2 -каждые 2 минуты
+*/10 - каждые 10 минут
+
+	*/2 каждые пол часа
+        */4 каждые 4 часа
+	6,18 в 6 и 8 часов
+
+СИСТЕМНЫЙ crontab 
+/etc/crontab
+
+cat /var/log/syslog | grep cron
+
+SNAP
+Для установки snap выполните:
+apt install snapd
+После чего запустите службу и проверьте ее статус.
+systemctl start snapd
+systemctl status snapd
+В Debian также рекомендуется сразу установить базовый пакет core:
+snap install core
+Хорошо, но откуда брать пакеты? Можно воспользоваться сайтом snapcraft.io,
+ Например, поищем Телеграм:
+snap find telegream
+Однако не будет ничего страшного, если вы по привычке наберете:
+snap search telegream
+Как мы уже видели выше, для установки snap пакета нужно использовать команду install с именем пакета:
+
+snap install telegram-desktop
+Посмотреть на список установленных snap можно командой:
+snap list 
+Для удаления пакета используйте:
+snap remove telegram-desktop
+Если вы не хотите ждать окончания процесса удаления и хотите сразу вернуться в консоль, оставив процесс работать в фоне, используйте:
+snap remove telegram-desktop --no-wait
+Чтобы полностью удалить пакет, вместе с пользовательскими настройками и данными выполните:
+snap remove telegram-desktop --purge
+Альтернативой удалению может служить отключение пакета, после чего он будет сохранен, но перестанет быть доступным:
+snap disable telegram-desktop
+Для включения выполните обратную команду:
+snap enable telegram-desktop
+Чтобы запустить обновление вручную выполните команду:
+snap refresh
+Чтобы обновить только отдельный пакет просто укажите его имя:
+snap refresh telegram-desktop
+Проверить периодичность обновления можно командой:
+snap refresh --time
+Посмотреть планируемые к обновлению пакеты вы можете командой:
+snap refresh --list
+Следующий актуальный вопрос: что делать, если что-то пошло не так? В этом случае вы всегда можете откатиться на предыдущую версию пакета, для этого используйте:
+Для обновления всех снапов используется другая команда:
+sudo snap resresh
+snap revert telegram-desktop
+Приложение будет откачено на предыдущую версию и больше не будет автоматически обновляться на ту версию с которой сделали откат, обновление произойдет только после того, как издатель опубликует в snap новую версию.
+
+Посмотреть список доступных версий можно командой:
+
+snap list --all 
+или для отдельного пакета:
+
+snap list --all telegram-desktop
+По умолчанию хранится две версии пакета: установленная и предыдущая.
+Каналы - важная часть концепции snap, позволяя выбирать различные ветви развития продукта и обновляться в их рамках. Каждый канал состоит из трех частей:
+
+Tracks - выпуски (треки) - позволяют разработчикам публиковать несколько выпусков своего продукта под одним именем
+Risk-levels - уровни риска - предоставляют несколько вариантов выбора между стабильностью и новыми функциями
+Branches - ветви - необязательная часть канала, предназначены для временных выпусков, исправляющих ошибки.
+Существуют четыре уровня риска:
+
+stable - стабильные выпуски, рекомендуемые к применению в производственных средах.
+candidate - выпуски, готовые к переходу в стабильное состояние, но требующие дополнительного тестирования
+beta - бета версии продукта для тестирования вне производственных сред
+edge - выпуски в процессе разработки, представляют собой постоянный поток изменений без обеспечения качества кода
+
+Для того, чтобы проверить какие каналы есть у интересующего вас пакета выполните:
+
+snap info firefox
+Допустим, мы хотим переключиться на стабильную версию esr - нет ничего проще:
+
+snap switch --channel=esr/stable firefox
+Затем просто обновите пакет:
+
+snap refresh firefox
+Также можно совместить все в одну команду:
+
+snap refresh --channel=esr/stable firefox
+Если вы хотите переключить уровни риска в пределах одного выпуска, то просто укажите:
+
+snap refresh --channel=candidate firefox
+Также ключ --channel можно использовать и при установке пакета, чтобы сразу указать необходимый выпуск, например:
+
+snap install --channel=esr/stable firefox
+PostgreSQL
+
+
+uname -а  какая версия
+lsdev Выводит информацию об устройствах.
+lshal Выводит параметры всех устройств
+
+lsusb, lshw  Выводят соответственно список PCIlspci устройств, USВ-устройств и список обору до-
+		вания компьютера
+
+iwconfig Выводит информацию обо всех беспроводных интерфейсах
+iwlist scan Поиск беспроводных сетей
+
+HDD
+badЫocks -v <имя _устройства> Осуществляет проверку жесткого
+
+Команды head и tail: вывод первых и последних строк
+файла
+head -n 10 /var/log/messages
+tail -n 15 /var/log/messages
+
+Список репозитариев хранится в файле /etc/apt/sources.list.
+
+Права su,  добавить пользователя в файл /etc/sudoers.
+sudo apt [опции] команды [пакет]
+install <список пакетов> Устанавливает пакеты из списка
+remove <список Удаляет пакеты из списка.
+purge <список пакетов> Удаляет не только пакеты, но их конфигурационные файлы.
+check Поиск нарушенных зависимостей
+clean <список пакетов> Очищает локальное хранилище полученных пакетов. При установке, пакеты из репозитария
+загружаются в каталог var/cache/apt/archive.
+upgrade <список пакетов> Обновляет указанные пакеты, если пакеты не заданы, обновляет все пакеты,
+full-upgrade Обновляет всю системуОбновляет всю систему
+update  Синхронизирует внутреннюю базу данных о пакетах с источниками пакетов, которые описаны
+в /etc/apt/sources.list
+autoremove Команда apt autoremove удаляет эти зависимости, но только те, которые не нужны
+другим установленным пакетам
+list Вывести список установленных в системе пакетов:
+apt list --installed
+Вывести список пакетов, которые требуют обновления
+(у которых вышла новая версия):
+apt list --upgradaЬle
+Вывести список всех пакетов доступных для
+вашей системы:
+apt list --all-versions
+
+
+Не удалось
+получить доступ к файлу блокировки /var/lib/dpkg/lock-frontend - open
+(11: Ресурс временно недоступен). Ошибка возникает при попытке установить
+пакет в Ubuntu с помощью команды apt install.
+Данные ошибки появляются, когда программа 
+Обычно существует две основные причины появления, описанных ошибок:
+• В данный момент уже выполняется экземпляр программы apt
+• Предыдущий вызов apt завершился некорректноapt не может получить доступ
+
+Выполним следующую команду, чтобы проверить есть ли
+apt в списке запущенных процессов:
+ps aux I grep -i apt
+Если при выполнении каких-нибудь из этих команд появится сообщение:
+rm: невозможно удалить '/var/ .. /lock': Нет такого файла или
+каталога, это нормально, не обращайте на него внимания.
+После этого нужно выполнить переконфигурацию пакетов:
+sudo dpkg --configure -а
+к файлу блокировки /var/lib/dpkg/lock*
+
+sudo add-apt-repository <PPA_info> <- эта команда добавляет репозиторий PPA в список.
+sudo apt-get update <- Эта команда обновляет список пакетов, которые можно установить в системе.
+sudo apt-get install <package_in_PPA> <- эта команда устанавливает пакет.
+Здесь важно помнить, что при использовании PPA он не меняет исходный список источников. Вместо этого он создает два файла в каталоге /etc/apt/sources.d, список и файл резервной копии с суффиксом «save».
+ /etc/os-release какой релиз установлен для него проверить совместимость
+
+
+echo $PATH
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/local/bin"
+export PATH=$PATH:/opt/local/bin Добавит путь
+Редктируем на постоянку
+sudo vi /etc/environment
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/opt/local/bin"
+
+Просмотреть таблицу маршрутизации
+# netstat -rn
+# route
+Теперь рассмотрим общий формат вызова команды route:
+# route [операция] [тип] адресат gw шлюз [метрика] [dev
+интерфейс]
+Параметр операция может принимать значения add и del. Первый добавляет
+маршрут, а второй - удаляет. Второй параметр (тип) необязательный
+- он позволяет задать тип маршрута: default (маршрут по умолчанию), -net
+(маршрут к сети), -host (маршрут к узлу).
+
+как превратить комьютерв шлюз.
+
+Для этого нужно разрешить пересылку пакетов протокола
+Pv4 (1Pv4 forw,arding). Для этого добавьте значение 1 в файл /proc/sys/
+et/ipv4/ip forward:
+echo 1 > /proc/sys/net/ipv4/ip_forward
+Конечно, после перезапуска это значение будет потеряно. Чтобы его сохраить,
+добавьте в файл /etc/sysctl.conf следующую строку:
+et.ipv4.ip_forward=0
+lтак, ваш компьютер теперь превращен в шлюз. Но сам по себе перенаравлять
+пакеты он не будет. Нужно задать ряд правил перенаправления
+акетов. Для этого мы будем использовать брандмауэр iptaЬles,
+
+GIT
+git --version
+apt install git
+Заводим пользователя
+git config --global user.name ubuntu
+git config --global user.email andrii.basenko@outlook.com
+git config --global user.color.ui auto
+git config --list просмотр параметров
+
+git add myfile.txt	додаем файл 	
+
+git commit		сохраняем его состояние
+git log			смотрим состояние файла
+git log --oneline	короткий вариант просмотра			
+
+git commit -am 'комент состояния файла' 3 предю команды в одной
+
+git reset --hard <hash commita>		возврат к версии файла по его хэшу
+
+git reflog	просмотр всех вариантов хеш файлов
+
+
+git windows download
+https://git-scm.com/downloads/win
+
+github
+ssh-keygen -t ed25519	/home/ubuntu/.ssh/githubkey
+cat /home/ubuntu/.ssh/githubkey.pub копируем публичный в свой github
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK5k2CsLCZxgjf1WP+u1jlnz5msmLoMocy/jWbgQ2gMM
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK5k2CsLCZxgjf1WP+u1jlnz5msmLoMocy/jWbgQ2gMM
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAiDpx2TumiW5WyS/pfLaZtn4LY9akDadhbyePeC9Fvw @bavilenovich                                                                                                                              @bavilenovich
+
+git clone https://github.com/bavilenovich/myFirstRepo.git /home/ubuntu/mygithub
+
+git push
+git pull
+
+
+…or create a new repository on the command line
+echo "# MyPrivateRepo" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin git@github.com:bavilenovich/MyPrivateRepo.git
+git push -u origin main
+
+…or push an existing repository from the command line
+git remote add origin git@github.com:bavilenovich/MyPrivateRepo.git
+git branch -M main
+git push -u origin mainmc
+
+
+
+
