@@ -336,6 +336,11 @@ git init
 touch myfile.txt
 
 1)git add myfile.txt	додаем файл на отслеживание
+	git add -i  додаем файлы по выбору
+	git add file1 file2 додаем 2 конкретных файла
+		git status статус где были изменения
+	делаем коммит: $ git commit -m 'добавили изменения в file1 и file2'
+
 2)git commit "комент состояния"		сохраняем его состояние
 и так при каждом именении
 
@@ -373,6 +378,7 @@ echo "# MyPrivateRepo" >> README.md
 git init
 git add README.md
 git commit -m "first commit"
+
 git branch -M main
 git remote add origin git@github.com:bavilenovich/MyPrivateRepo.git
 git push -u origin main
@@ -391,6 +397,7 @@ git fetch
 
 Обычно сливаются ветвь удаленного отслеживания (т. е. ветвь, полученная из удаленного репозитория) и локальная ветвь:
 
+merge используется для слияния работы, проделанной вами и другими пользователями,
 $ git merge REMOTE-NAME/BRANCH-NAME
 git merge --abort, чтобы вернуть ветвь туда, где она находилась до вытягивания.
 
@@ -410,6 +417,14 @@ git archive
 git submodule
 Команда git submodule используется для управления вложенными репозиториями. Например, это могут быть библиотеки или другие, используемые не только в этом проекте ресурсы. У команды submodule есть несколько под-команд?—?add, update, sync и др.?—?для управления такими репозиториями.
 
+Ветки
+git branch Docker	Создание ветки
+git branch		в какой ветке нахожусь
+git checkout Docker  Переход на ветку
+
+git push --set-upstream origin Docker пушит ветку с локального гита на глобальный
+
+11111111111111111111
 
 
 
