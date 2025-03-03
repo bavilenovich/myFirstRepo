@@ -318,21 +318,31 @@ lтак, ваш компьютер теперь превращен в шлюз. Но сам по себе перенаравлять
 акетов. Для этого мы будем использовать брандмауэр iptaЬles,
 
 GIT
-git --version
-apt install git
+https://www.youtube.com/watch?v=iBrQooiY8bQ&list=PL9x2twfbtCCMJ1gBdKWYxmXP--6izlYo2
+Stanislav Kuznezov
+git --version какая версия гита стоит
+apt install git	устанавливаем гит если не стоит
 Заводим пользователя
 git config --global user.name ubuntu
 git config --global user.email andrii.basenko@outlook.com
+
 git config --global user.color.ui auto
 git config --list просмотр параметров
 
-git add myfile.txt	додаем файл 	
+создаем локальный репозитарий
+Создаем папку для репозитария. Заходим в нее и инициализируем репозитарий
+git init
+создаем в нем файл
+touch myfile.txt
 
-git commit		сохраняем его состояние
+1)git add myfile.txt	додаем файл на отслеживание
+2)git commit "комент состояния"		сохраняем его состояние
+и так при каждом именении
+
 git log			смотрим состояние файла
 git log --oneline	короткий вариант просмотра			
 
-git commit -am 'комент состояния файла' 3 предю команды в одной
+git commit -am 'комент состояния файла'  предыдущие 1-2 команды в одной строке
 
 git reset --hard <hash commita>		возврат к версии файла по его хэшу
 
@@ -340,8 +350,11 @@ git reflog	просмотр всех вариантов хеш файлов
 
 
 git windows download
-https://git-scm.com/downloads/win
+https://git-scm.com/downloads/win	Устанавливаем
+Запускаем из меню git cmd
+устанавливаем глобальные параметры
 
+git config --global --add safe.directory C:/Users/tpkf/mygithub/myFirstR
 github
 ssh-keygen -t ed25519	/home/ubuntu/.ssh/githubkey
 cat /home/ubuntu/.ssh/githubkey.pub копируем публичный в свой github
